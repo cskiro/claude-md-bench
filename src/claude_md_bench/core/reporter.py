@@ -75,20 +75,21 @@ class Reporter:
         analysis_a = result.version_a["analysis"]
         analysis_b = result.version_b["analysis"]
 
-        winner_a = "[green]" if result.winner == "A" else ""
-        winner_b = "[green]" if result.winner == "B" else ""
+        # Format scores with winner highlighting
+        score_a = f"[green]{analysis_a['score']:.1f}/100[/green]" if result.winner == "A" else f"{analysis_a['score']:.1f}/100"
+        score_b = f"[green]{analysis_b['score']:.1f}/100[/green]" if result.winner == "B" else f"{analysis_b['score']:.1f}/100"
 
         table.add_row(
             f"A: {result.version_a['name']}",
-            f"{winner_a}{analysis_a['score']:.1f}/100[/]",
+            score_a,
             f"{analysis_a['file_size']:,} chars",
-            "" if result.winner == "A" else "",
+            "🏆" if result.winner == "A" else "",
         )
         table.add_row(
             f"B: {result.version_b['name']}",
-            f"{winner_b}{analysis_b['score']:.1f}/100[/]",
+            score_b,
             f"{analysis_b['file_size']:,} chars",
-            "" if result.winner == "B" else "",
+            "🏆" if result.winner == "B" else "",
         )
 
         self.console.print(table)
