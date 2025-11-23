@@ -14,7 +14,7 @@ from rich.console import Console
 from rich.table import Table
 
 from claude_md_bench import __version__
-from claude_md_bench.commands import compare
+from claude_md_bench.commands.compare import compare
 from claude_md_bench.llm.ollama import OllamaClient
 
 # Configure logging
@@ -31,7 +31,7 @@ app = typer.Typer(
 )
 
 # Register compare command
-app.add_typer(compare.app, name="compare")
+app.command()(compare)
 
 console = Console()
 

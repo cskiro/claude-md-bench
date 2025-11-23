@@ -16,16 +16,9 @@ from claude_md_bench.core.analyzer import ClaudeMDAnalyzer
 from claude_md_bench.core.reporter import Reporter
 from claude_md_bench.llm.ollama import OllamaClient, OllamaConnectionError
 
-app = typer.Typer(
-    name="compare",
-    help="Compare two CLAUDE.md files",
-    no_args_is_help=True,
-)
-
 console = Console()
 
 
-@app.callback(invoke_without_command=True)
 def compare(
     file_a: Annotated[
         Path,
@@ -61,7 +54,6 @@ def compare(
         str,
         typer.Option(
             "--host",
-            "-h",
             help="Ollama API host",
         ),
     ] = "http://localhost:11434",
