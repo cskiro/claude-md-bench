@@ -134,3 +134,6 @@ Thumbs.db
 reports/
 *.html
 !src/claude_md_bench/templates/*.html
+
+# Lessons learned (auto-generated, user-specific)
+docs/lessons-learned/
