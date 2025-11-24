@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLAUDE.md Comparison Report</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,7 +19,7 @@
             font-family: 'JetBrains Mono', monospace;
             line-height: 1.6;
             color: #e8e6e3;
-            background: #2d2520;
+            background: #DA7756;
             padding: 40px 20px;
             min-height: 100vh;
         }
@@ -230,6 +233,200 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Detailed Analysis Collapsible Section */
+        .detailed-analysis {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(45, 37, 32, 0.5);
+            border-radius: 8px;
+            border: 1px solid rgba(205, 127, 107, 0.2);
+        }
+
+        .detailed-analysis summary {
+            cursor: pointer;
+            color: #cd7f6b;
+            font-weight: 500;
+            font-size: 0.9em;
+            list-style: none;
+        }
+
+        .detailed-analysis summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .detailed-analysis summary::before {
+            content: "▶ ";
+            font-size: 0.7em;
+            margin-right: 0.5em;
+        }
+
+        .detailed-analysis[open] summary::before {
+            content: "▼ ";
+        }
+
+        .detailed-analysis summary:hover {
+            color: #e8a090;
+        }
+
+        .detailed-analysis summary:focus {
+            outline: 2px solid #cd7f6b;
+            outline-offset: 2px;
+        }
+
+        .analysis-content {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(205, 127, 107, 0.2);
+            white-space: pre-wrap;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #c0bdb8;
+        }
+
+        /* Drawer Component */
+        .drawer-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        .drawer-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: min(600px, 90vw);
+            height: 100vh;
+            background: #1a1816;
+            border-left: 1px solid #3d3632;
+            box-shadow: -8px 0 40px rgba(0, 0, 0, 0.4);
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+            will-change: transform;
+            contain: layout style paint;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer.active {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid #3d3632;
+            background: rgba(45, 37, 32, 0.5);
+        }
+
+        .drawer-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #e8e6e3;
+            margin: 0;
+        }
+
+        .drawer-close {
+            background: none;
+            border: none;
+            color: #8a8580;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: color 0.2s, background-color 0.2s;
+        }
+
+        .drawer-close:hover {
+            color: #cd7f6b;
+            background: rgba(205, 127, 107, 0.1);
+        }
+
+        .drawer-close:focus {
+            outline: 2px solid #cd7f6b;
+            outline-offset: 2px;
+        }
+
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .drawer-body pre {
+            margin: 0;
+            padding: 16px 24px;
+            background: transparent;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .drawer-body pre code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .drawer-footer {
+            padding: 12px 24px;
+            border-top: 1px solid #3d3632;
+            background: rgba(45, 37, 32, 0.5);
+            font-size: 0.8em;
+            color: #6a6560;
+        }
+
+        /* Version blocks as clickable triggers */
+        .version-block[data-drawer-trigger] {
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .version-block[data-drawer-trigger]:hover {
+            border-color: rgba(205, 127, 107, 0.4);
+            box-shadow: 0 0 0 1px rgba(205, 127, 107, 0.2);
+        }
+
+        .version-block[data-drawer-trigger]:focus {
+            outline: 2px solid #cd7f6b;
+            outline-offset: 2px;
+        }
+
+        .version-block[data-drawer-trigger]::after {
+            content: "Click to view source";
+            display: block;
+            margin-top: 8px;
+            font-size: 0.75em;
+            color: #6a6560;
+        }
+
+        /* Override Prism theme for better dark mode compatibility */
+        .drawer-body code[class*="language-"],
+        .drawer-body pre[class*="language-"] {
+            background: transparent;
+            text-shadow: none;
+        }
+
+        @media (max-width: 768px) {
+            .drawer {
+                width: 100vw;
+            }
+        }
+
+        /* Prevent body scroll when drawer is open */
+        body.drawer-open {
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -239,7 +436,12 @@
 
             <h2>Summary</h2>
             <div class="summary-grid">
-                <div class="version-block">
+                <div class="version-block"
+                     data-drawer-trigger
+                     data-version="A"
+                     tabindex="0"
+                     role="button"
+                     aria-label="View Version A source content">
                     <div class="version-header">Version A</div>
                     <div class="score score-a">{{ "%.1f"|format(version_a.score) }}/100</div>
                     <div class="meta">
@@ -251,7 +453,12 @@
                     {% endif %}
                 </div>
 
-                <div class="version-block">
+                <div class="version-block"
+                     data-drawer-trigger
+                     data-version="B"
+                     tabindex="0"
+                     role="button"
+                     aria-label="View Version B source content">
                     <div class="version-header">Version B</div>
                     <div class="score score-b">{{ "%.1f"|format(version_b.score) }}/100</div>
                     <div class="meta">
@@ -312,6 +519,13 @@
                         </ul>
                     </div>
                     {% endif %}
+
+                    {% if version_a.detailed_analysis %}
+                    <details class="detailed-analysis">
+                        <summary>Full LLM Analysis</summary>
+                        <div class="analysis-content">{{ version_a.detailed_analysis }}</div>
+                    </details>
+                    {% endif %}
                 </div>
 
                 <div class="analysis-block">
@@ -337,6 +551,13 @@
                         </ul>
                     </div>
                     {% endif %}
+
+                    {% if version_b.detailed_analysis %}
+                    <details class="detailed-analysis">
+                        <summary>Full LLM Analysis</summary>
+                        <div class="analysis-content">{{ version_b.detailed_analysis }}</div>
+                    </details>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -345,5 +566,182 @@
             Generated by claude-md-bench | {{ timestamp }}
         </footer>
     </div>
+
+    <!-- Drawer Panel -->
+    <div id="drawer-panel"
+         class="drawer"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="drawer-title"
+         aria-hidden="true"
+         tabindex="-1">
+        <div class="drawer-header">
+            <h2 id="drawer-title" class="drawer-title">Version A</h2>
+            <button class="drawer-close" aria-label="Close panel">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <pre class="line-numbers"><code id="drawer-content" class="language-markdown"></code></pre>
+        </div>
+        <div class="drawer-footer">
+            <span class="line-count">0 lines</span>
+        </div>
+    </div>
+
+    <!-- Backdrop -->
+    <div id="drawer-backdrop" class="drawer-backdrop"></div>
+
+    <!-- Content Templates -->
+    <script type="text/template" id="version-a-content">{{ version_a.content | e }}</script>
+    <script type="text/template" id="version-b-content">{{ version_b.content | e }}</script>
+
+    <!-- Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Drawer JavaScript -->
+    <script>
+    (function() {
+        'use strict';
+
+        // State
+        let state = {
+            isOpen: false,
+            previouslyFocused: null,
+            currentVersion: null
+        };
+
+        // DOM Elements
+        const drawer = document.getElementById('drawer-panel');
+        const backdrop = document.getElementById('drawer-backdrop');
+        const closeBtn = drawer.querySelector('.drawer-close');
+        const drawerTitle = document.getElementById('drawer-title');
+        const drawerContent = document.getElementById('drawer-content');
+        const lineCount = drawer.querySelector('.line-count');
+        const triggers = document.querySelectorAll('[data-drawer-trigger]');
+
+        // Get focusable elements within drawer
+        function getFocusableElements() {
+            return drawer.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+        }
+
+        // Open drawer
+        function openDrawer(version) {
+            state.previouslyFocused = document.activeElement;
+            state.currentVersion = version;
+            state.isOpen = true;
+
+            // Load content
+            const templateId = `version-${version.toLowerCase()}-content`;
+            const template = document.getElementById(templateId);
+            const content = template ? template.textContent : 'Content not available';
+
+            drawerContent.textContent = content;
+            drawerTitle.textContent = `Version ${version}`;
+
+            // Count lines
+            const lines = content.split('\n').length;
+            lineCount.textContent = `${lines} lines`;
+
+            // Highlight with Prism
+            if (window.Prism) {
+                Prism.highlightElement(drawerContent);
+            }
+
+            // Show drawer
+            drawer.classList.add('active');
+            backdrop.classList.add('active');
+            drawer.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('drawer-open');
+
+            // Focus drawer
+            drawer.focus();
+
+            // Dispatch event
+            drawer.dispatchEvent(new CustomEvent('drawer:open', {
+                detail: { version }
+            }));
+        }
+
+        // Close drawer
+        function closeDrawer() {
+            if (!state.isOpen) return;
+
+            state.isOpen = false;
+            drawer.classList.remove('active');
+            backdrop.classList.remove('active');
+            drawer.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('drawer-open');
+
+            // Return focus
+            if (state.previouslyFocused) {
+                state.previouslyFocused.focus();
+            }
+
+            // Dispatch event
+            drawer.dispatchEvent(new CustomEvent('drawer:close', {
+                detail: { version: state.currentVersion }
+            }));
+
+            state.currentVersion = null;
+        }
+
+        // Focus trap
+        function handleTab(e) {
+            if (!state.isOpen) return;
+
+            const focusable = getFocusableElements();
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+
+        // Event listeners
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const version = trigger.dataset.version;
+                openDrawer(version);
+            });
+
+            trigger.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const version = trigger.dataset.version;
+                    openDrawer(version);
+                }
+            });
+        });
+
+        closeBtn.addEventListener('click', closeDrawer);
+        backdrop.addEventListener('click', closeDrawer);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && state.isOpen) {
+                closeDrawer();
+            }
+            if (e.key === 'Tab' && state.isOpen) {
+                handleTab(e);
+            }
+        });
+
+        // Public API
+        window.DrawerPanel = {
+            open: openDrawer,
+            close: closeDrawer,
+            on: (event, callback) => {
+                drawer.addEventListener(`drawer:${event}`, callback);
+            }
+        };
+    })();
+    </script>
 </body>
 </html>
