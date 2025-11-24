@@ -100,3 +100,6 @@ exclude_lines = [
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
 ]
+# POC threshold - increase to 80% as codebase matures
+# Current gaps are presentation layer (console output) which is brittle to test
+fail_under = 65

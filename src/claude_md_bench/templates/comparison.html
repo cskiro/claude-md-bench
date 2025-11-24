@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLAUDE.md Comparison Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,224 +13,219 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            font-family: 'JetBrains Mono', monospace;
             line-height: 1.6;
-            color: #333;
-            background: #f5f5f5;
-            padding: 20px;
+            color: #e8e6e3;
+            background: #2d2520;
+            padding: 40px 20px;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 900px;
             margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #1a1816;
+            border-radius: 12px;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
+                        0 8px 40px rgba(0, 0, 0, 0.4),
+                        0 0 80px rgba(205, 127, 107, 0.15);
             overflow: hidden;
+            border: 1px solid #3d3632;
         }
 
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
+        .content {
+            padding: 32px 40px;
         }
 
-        header h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
+        h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #e8e6e3;
+            margin-bottom: 24px;
         }
 
-        header p {
-            opacity: 0.9;
+        h2 {
             font-size: 1.1em;
+            font-weight: 600;
+            color: #6eb5a8;
+            margin: 28px 0 16px 0;
         }
 
-        .summary {
+        h2:first-of-type {
+            margin-top: 0;
+        }
+
+        .summary-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 30px;
-            background: #f8f9fa;
-            border-bottom: 2px solid #e9ecef;
+            gap: 24px;
+            margin-bottom: 8px;
         }
 
-        .card {
-            background: white;
-            padding: 20px;
+        .version-block {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-        .card h3 {
-            font-size: 1.3em;
-            margin-bottom: 15px;
-            color: #495057;
+        .version-header {
+            font-weight: 600;
+            color: #e8e6e3;
+            margin-bottom: 12px;
         }
 
-        .score-display {
-            font-size: 3em;
-            font-weight: bold;
-            margin: 10px 0;
+        .score {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
 
         .score-a {
-            color: #f06292;
+            color: #f0a0a0;
         }
 
         .score-b {
-            color: #4fc3f7;
+            color: #a0d0f0;
         }
 
-        .winner {
-            color: #66bb6a;
-            font-weight: bold;
-            font-size: 1.2em;
-            margin-top: 10px;
+        .meta {
+            font-size: 0.85em;
+            color: #8a8580;
         }
 
-        .meta-info {
-            font-size: 0.9em;
-            color: #6c757d;
-            margin-top: 10px;
+        .meta strong {
+            color: #b0ada8;
         }
 
-        .meta-info strong {
-            color: #495057;
-        }
-
-        .dimensions {
-            padding: 30px;
-        }
-
-        .dimensions h2 {
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            color: #495057;
+        .winner-badge {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 4px 10px;
+            background: rgba(110, 181, 168, 0.2);
+            color: #6eb5a8;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
         }
 
         .dimension-row {
-            margin-bottom: 25px;
+            margin-bottom: 16px;
         }
 
         .dimension-name {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #495057;
+            font-size: 0.9em;
+            color: #b0ada8;
+            margin-bottom: 6px;
             text-transform: capitalize;
         }
 
-        .dimension-bars {
+        .bar-group {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .bar-label {
+            width: 20px;
+            font-size: 0.75em;
+            color: #8a8580;
         }
 
         .bar-container {
             flex: 1;
-            height: 30px;
-            background: #e9ecef;
-            border-radius: 4px;
-            position: relative;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
             overflow: hidden;
         }
 
         .bar {
             height: 100%;
-            border-radius: 4px;
-            transition: width 0.5s ease;
+            border-radius: 3px;
             display: flex;
             align-items: center;
-            padding-left: 10px;
-            color: white;
+            padding-left: 8px;
+            font-size: 0.75em;
             font-weight: 600;
+            color: rgba(0, 0, 0, 0.7);
+            min-width: 30px;
         }
 
         .bar-a {
-            background: linear-gradient(90deg, #f06292 0%, #f48fb1 100%);
+            background: #f0a0a0;
         }
 
         .bar-b {
-            background: linear-gradient(90deg, #4fc3f7 0%, #81d4fa 100%);
-        }
-
-        .bar-label {
-            min-width: 80px;
-            text-align: right;
-            font-size: 0.9em;
-            color: #6c757d;
-        }
-
-        .analysis {
-            padding: 30px;
-            background: #f8f9fa;
-        }
-
-        .analysis h2 {
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            color: #495057;
+            background: #a0d0f0;
         }
 
         .analysis-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 24px;
         }
 
-        .analysis-section h4 {
-            font-size: 1.1em;
-            margin-bottom: 10px;
-            color: #495057;
+        .analysis-block h3 {
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #e8e6e3;
+            margin-bottom: 12px;
         }
 
-        .analysis-section ul {
+        .list-section {
+            margin-bottom: 16px;
+        }
+
+        .list-label {
+            font-size: 0.85em;
+            color: #6eb5a8;
+            margin-bottom: 8px;
+        }
+
+        .list-label.weaknesses {
+            color: #cd7f6b;
+        }
+
+        ul {
             list-style: none;
             padding: 0;
         }
 
-        .analysis-section li {
-            padding: 8px;
-            margin-bottom: 5px;
-            background: white;
-            border-radius: 4px;
-            border-left: 3px solid #ddd;
+        li {
+            padding: 6px 0;
+            padding-left: 16px;
+            position: relative;
+            font-size: 0.85em;
+            color: #c0bdb8;
         }
 
-        .analysis-section.strengths li {
-            border-left-color: #66bb6a;
-        }
-
-        .analysis-section.weaknesses li {
-            border-left-color: #ef5350;
+        li::before {
+            content: "-";
+            position: absolute;
+            left: 0;
+            color: #6a6560;
         }
 
         footer {
-            padding: 20px 30px;
-            background: #495057;
-            color: white;
+            padding: 16px 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.8em;
+            color: #6a6560;
             text-align: center;
-            font-size: 0.9em;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-
-        .badge-winner {
-            background: #66bb6a;
-            color: white;
         }
 
         @media (max-width: 768px) {
-            .summary {
-                grid-template-columns: 1fr;
+            body {
+                padding: 20px 12px;
             }
 
+            .content {
+                padding: 24px 20px;
+            }
+
+            .summary-grid,
             .analysis-grid {
                 grid-template-columns: 1fr;
             }
@@ -238,72 +234,66 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>📊 CLAUDE.md Comparison Report</h1>
-            <p>Multi-dimensional analysis and scoring</p>
-        </header>
+        <div class="content">
+            <h1>CLAUDE.md Comparison Report</h1>
 
-        <div class="summary">
-            <div class="card">
-                <h3>📄 Version A</h3>
-                <div class="score-display score-a">{{ "%.1f"|format(version_a.score) }}/100</div>
-                <div class="meta-info">
-                    <strong>Project:</strong> {{ version_a.name }}<br>
-                    <strong>Size:</strong> {{ "{:,}".format(version_a.size) }} chars<br>
-                    <strong>Path:</strong> {{ version_a.path }}
+            <h2>Summary</h2>
+            <div class="summary-grid">
+                <div class="version-block">
+                    <div class="version-header">Version A</div>
+                    <div class="score score-a">{{ "%.1f"|format(version_a.score) }}/100</div>
+                    <div class="meta">
+                        <strong>Project:</strong> {{ version_a.name }}<br>
+                        <strong>Size:</strong> {{ "{:,}".format(version_a.size) }} chars
+                    </div>
+                    {% if winner == 'A' %}
+                    <div class="winner-badge">Winner (+{{ "%.1f"|format(score_delta) }})</div>
+                    {% endif %}
                 </div>
-                {% if winner == 'A' %}
-                <div class="winner">🏆 Winner! (+{{ "%.1f"|format(score_delta) }} points)</div>
-                {% endif %}
+
+                <div class="version-block">
+                    <div class="version-header">Version B</div>
+                    <div class="score score-b">{{ "%.1f"|format(version_b.score) }}/100</div>
+                    <div class="meta">
+                        <strong>Project:</strong> {{ version_b.name }}<br>
+                        <strong>Size:</strong> {{ "{:,}".format(version_b.size) }} chars
+                    </div>
+                    {% if winner == 'B' %}
+                    <div class="winner-badge">Winner (+{{ "%.1f"|format(score_delta) }})</div>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="card">
-                <h3>📄 Version B</h3>
-                <div class="score-display score-b">{{ "%.1f"|format(version_b.score) }}/100</div>
-                <div class="meta-info">
-                    <strong>Project:</strong> {{ version_b.name }}<br>
-                    <strong>Size:</strong> {{ "{:,}".format(version_b.size) }} chars<br>
-                    <strong>Path:</strong> {{ version_b.path }}
-                </div>
-                {% if winner == 'B' %}
-                <div class="winner">🏆 Winner! (+{{ "%.1f"|format(score_delta) }} points)</div>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="dimensions">
-            <h2>📈 Dimension Comparison</h2>
+            <h2>Dimension Comparison</h2>
             {% for dim_name, scores in dimensions.items() %}
             <div class="dimension-row">
                 <div class="dimension-name">{{ dim_name.replace('_', ' ') }}</div>
-                <div class="dimension-bars">
+                <div class="bar-group">
+                    <div class="bar-label">A</div>
                     <div class="bar-container">
                         <div class="bar bar-a" style="width: {{ scores.a }}%">
                             {{ "%.0f"|format(scores.a) }}
                         </div>
                     </div>
-                    <div class="bar-label">Version A</div>
                 </div>
-                <div class="dimension-bars">
+                <div class="bar-group">
+                    <div class="bar-label">B</div>
                     <div class="bar-container">
                         <div class="bar bar-b" style="width: {{ scores.b }}%">
                             {{ "%.0f"|format(scores.b) }}
                         </div>
                     </div>
-                    <div class="bar-label">Version B</div>
                 </div>
             </div>
             {% endfor %}
-        </div>
 
-        <div class="analysis">
-            <h2>🔍 Detailed Analysis</h2>
+            <h2>Detailed Analysis</h2>
             <div class="analysis-grid">
-                <div class="card">
+                <div class="analysis-block">
                     <h3>Version A</h3>
                     {% if version_a.strengths %}
-                    <div class="analysis-section strengths">
-                        <h4>✅ Strengths</h4>
+                    <div class="list-section">
+                        <div class="list-label">Strengths</div>
                         <ul>
                             {% for strength in version_a.strengths %}
                             <li>{{ strength }}</li>
@@ -313,8 +303,8 @@
                     {% endif %}
 
                     {% if version_a.weaknesses %}
-                    <div class="analysis-section weaknesses" style="margin-top: 20px;">
-                        <h4>⚠️ Areas for Improvement</h4>
+                    <div class="list-section">
+                        <div class="list-label weaknesses">Areas for Improvement</div>
                         <ul>
                             {% for weakness in version_a.weaknesses %}
                             <li>{{ weakness }}</li>
@@ -324,11 +314,11 @@
                     {% endif %}
                 </div>
 
-                <div class="card">
+                <div class="analysis-block">
                     <h3>Version B</h3>
                     {% if version_b.strengths %}
-                    <div class="analysis-section strengths">
-                        <h4>✅ Strengths</h4>
+                    <div class="list-section">
+                        <div class="list-label">Strengths</div>
                         <ul>
                             {% for strength in version_b.strengths %}
                             <li>{{ strength }}</li>
@@ -338,8 +328,8 @@
                     {% endif %}
 
                     {% if version_b.weaknesses %}
-                    <div class="analysis-section weaknesses" style="margin-top: 20px;">
-                        <h4>⚠️ Areas for Improvement</h4>
+                    <div class="list-section">
+                        <div class="list-label weaknesses">Areas for Improvement</div>
                         <ul>
                             {% for weakness in version_b.weaknesses %}
                             <li>{{ weakness }}</li>
@@ -352,7 +342,7 @@
         </div>
 
         <footer>
-            <p>Generated by claude-md-bench • {{ timestamp }}</p>
+            Generated by claude-md-bench | {{ timestamp }}
         </footer>
     </div>
 </body>

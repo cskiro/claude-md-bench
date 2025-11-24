@@ -137,3 +137,6 @@ reports/
 
 # Lessons learned (auto-generated, user-specific)
 docs/lessons-learned/
+
+# Project CLAUDE.md (user-specific configuration)
+CLAUDE.md
