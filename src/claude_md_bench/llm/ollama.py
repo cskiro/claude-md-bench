@@ -123,7 +123,7 @@ class OllamaClient:
                 response.raise_for_status()
 
                 result = response.json()
-                generated_text = result.get("response", "").strip()
+                generated_text: str = str(result.get("response", "")).strip()
 
                 if not generated_text:
                     raise OllamaError("Empty response from Ollama")
@@ -145,9 +145,7 @@ class OllamaClient:
                 logger.warning(f"Ollama request timeout: {e}")
                 if attempt < self.max_retries - 1:
                     continue
-                raise OllamaTimeoutError(
-                    f"Ollama request timed out after {self.timeout}s"
-                ) from e
+                raise OllamaTimeoutError(f"Ollama request timed out after {self.timeout}s") from e
 
             except requests.exceptions.HTTPError as e:
                 logger.error(f"Ollama HTTP error: {e}")
@@ -177,9 +175,7 @@ class OllamaClient:
 
             # Check for exact match or base model match (e.g., "llama3.2:latest" matches "llama3.2")
             model_base = self.model.split(":")[0]
-            model_found = any(
-                self.model == m or m.startswith(model_base) for m in models
-            )
+            model_found = any(self.model == m or m.startswith(model_base) for m in models)
 
             if not model_found:
                 logger.warning(f"Model '{self.model}' not found. Available: {models}")

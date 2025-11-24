@@ -7,13 +7,14 @@ Main Typer application that registers all commands.
 from __future__ import annotations
 
 import logging
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from claude_md_bench import __version__
+from claude_md_bench.commands.audit import audit
 from claude_md_bench.commands.compare import compare
 from claude_md_bench.commands.optimize import optimize
 from claude_md_bench.llm.ollama import OllamaClient
@@ -32,6 +33,7 @@ app = typer.Typer(
 )
 
 # Register commands
+app.command()(audit)
 app.command()(compare)
 app.command()(optimize)
 
@@ -55,7 +57,7 @@ def check(
         ),
     ] = "http://localhost:11434",
     model: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--model",
             "-m",

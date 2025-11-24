@@ -5,11 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 from typer.testing import CliRunner
 
 from claude_md_bench.cli import app
-
 
 runner = CliRunner()
 

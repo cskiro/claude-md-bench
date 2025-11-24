@@ -1,7 +1,7 @@
 """
-Compare command for claude-md-bench.
+Audit command for claude-md-bench.
 
-Compares two CLAUDE.md files and determines which is better.
+Analyzes a single CLAUDE.md file and provides quality assessment.
 """
 
 from __future__ import annotations
@@ -19,22 +19,11 @@ from claude_md_bench.llm.ollama import OllamaClient, OllamaConnectionError
 console = Console()
 
 
-def compare(
-    file_a: Annotated[
+def audit(
+    file: Annotated[
         Path,
         typer.Argument(
-            help="First CLAUDE.md file to compare",
-            exists=True,
-            file_okay=True,
-            dir_okay=False,
-            readable=True,
-            resolve_path=True,
-        ),
-    ],
-    file_b: Annotated[
-        Path,
-        typer.Argument(
-            help="Second CLAUDE.md file to compare",
+            help="Path to the CLAUDE.md file to audit",
             exists=True,
             file_okay=True,
             dir_okay=False,
@@ -75,20 +64,6 @@ def compare(
             help="Output format: text, html, or both",
         ),
     ] = "both",
-    name_a: Annotated[
-        str | None,
-        typer.Option(
-            "--name-a",
-            help="Display name for first version",
-        ),
-    ] = None,
-    name_b: Annotated[
-        str | None,
-        typer.Option(
-            "--name-b",
-            help="Display name for second version",
-        ),
-    ] = None,
     timeout: Annotated[
         int,
         typer.Option(
@@ -107,17 +82,17 @@ def compare(
     ] = False,
 ) -> None:
     """
-    Compare two CLAUDE.md files and determine which is better.
+    Audit a single CLAUDE.md file for quality and completeness.
 
-    Analyzes both files on 5 dimensions (Clarity, Completeness, Actionability,
-    Standards, Context) and provides detailed feedback with strengths and weaknesses.
+    Analyzes the file on 5 dimensions (Clarity, Completeness, Actionability,
+    Standards, Context) and provides detailed feedback with recommendations.
 
     Example:
-        claude-md-bench compare ~/.claude/CLAUDE.md ~/project/CLAUDE.md
+        claude-md-bench audit ~/.claude/CLAUDE.md
+        claude-md-bench audit ./CLAUDE.md --format html --output-dir ./reports
     """
-    # Use parent directory names if display names not provided
-    project_name_a = name_a or file_a.parent.name
-    project_name_b = name_b or file_b.parent.name
+    # Use parent directory name as project name
+    project_name = file.parent.name
 
     # Initialize Ollama client
     with console.status("[cyan]Connecting to Ollama...[/cyan]"):
@@ -127,34 +102,37 @@ def compare(
             timeout=timeout,
         )
 
-        if not ollama.check_health():
-            console.print(f"[red]Error:[/red] Cannot connect to Ollama at {host}")
+        try:
+            if not ollama.check_health():
+                console.print(f"[red]Error:[/red] Cannot connect to Ollama at {host}")
+                console.print("Ensure Ollama is running: [cyan]ollama serve[/cyan]")
+
+                # Check if model is available
+                available_models = ollama.list_models()
+                if available_models:
+                    console.print(f"\nAvailable models: {', '.join(available_models)}")
+                    if model not in available_models:
+                        console.print(f"\nModel '{model}' not found. Pull it with:")
+                        console.print(f"  [cyan]ollama pull {model}[/cyan]")
+
+                raise typer.Exit(1)
+        except OllamaConnectionError as e:
+            console.print(f"[red]Connection error:[/red] {e}")
             console.print("Ensure Ollama is running: [cyan]ollama serve[/cyan]")
-
-            # Check if model is available
-            available_models = ollama.list_models()
-            if available_models:
-                console.print(f"\nAvailable models: {', '.join(available_models)}")
-                if model not in available_models:
-                    console.print(f"\nModel '{model}' not found. Pull it with:")
-                    console.print(f"  [cyan]ollama pull {model}[/cyan]")
-
-            raise typer.Exit(1)
+            raise typer.Exit(1) from None
 
     if not quiet:
         console.print(f"[green]✓[/green] Ollama ready (model: {model})")
         console.print()
 
-    # Run comparison
+    # Run analysis
     analyzer = ClaudeMDAnalyzer(ollama)
 
     try:
-        with console.status("[cyan]Analyzing CLAUDE.md files...[/cyan]"):
-            result = analyzer.compare(
-                claude_md_a=file_a,
-                claude_md_b=file_b,
-                project_name_a=project_name_a,
-                project_name_b=project_name_b,
+        with console.status("[cyan]Analyzing CLAUDE.md file...[/cyan]"):
+            result = analyzer.analyze(
+                claude_md_path=file,
+                project_name=project_name,
             )
     except OllamaConnectionError as e:
         console.print(f"[red]Connection error:[/red] {e}")
@@ -164,33 +142,25 @@ def compare(
         raise typer.Exit(1) from None
 
     # Check for errors
-    if result.version_a["analysis"].get("error"):
-        console.print(
-            f"[red]Error analyzing {file_a}:[/red] {result.version_a['analysis']['error']}"
-        )
-        raise typer.Exit(1)
-
-    if result.version_b["analysis"].get("error"):
-        console.print(
-            f"[red]Error analyzing {file_b}:[/red] {result.version_b['analysis']['error']}"
-        )
+    if result.error:
+        console.print(f"[red]Error analyzing {file}:[/red] {result.error}")
         raise typer.Exit(1)
 
     # Display results
     reporter = Reporter(output_dir=output_dir)
 
     if not quiet:
-        reporter.print_comparison(result)
+        reporter.print_audit(result, file)
 
     # Save reports
     saved_paths: list[Path] = []
 
     if output_format in ("text", "both"):
-        text_path = reporter.save_text_report(result)
+        text_path = reporter.save_audit_text_report(result, file)
         saved_paths.append(text_path)
 
     if output_format in ("html", "both"):
-        html_path = reporter.save_html_report(result)
+        html_path = reporter.save_audit_html_report(result, file)
         if html_path:
             saved_paths.append(html_path)
 
