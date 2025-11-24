@@ -322,9 +322,9 @@ DETAILED_ANALYSIS:
             score=overall_score,
             file_size=file_size,
             dimension_scores=scores,
-            strengths=strengths or ["Analysis provided detailed feedback (see full response)"],
-            weaknesses=weaknesses or ["See detailed analysis for specific areas of improvement"],
-            recommendations=recommendations or ["Review detailed analysis for suggestions"],
+            strengths=strengths,
+            weaknesses=weaknesses,
+            recommendations=recommendations,
             detailed_analysis=detailed_analysis or response[:1000],
         )
 

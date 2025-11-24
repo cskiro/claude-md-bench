@@ -287,6 +287,17 @@ class Reporter:
                 "b": scores_b.get(dim, 0.0),
             }
 
+        # Read file contents for drawer display
+        try:
+            content_a = Path(result.version_a["path"]).read_text(encoding="utf-8")
+        except Exception:
+            content_a = "Unable to read file content"
+
+        try:
+            content_b = Path(result.version_b["path"]).read_text(encoding="utf-8")
+        except Exception:
+            content_b = "Unable to read file content"
+
         # Render template
         html_content = template.render(
             version_a={
@@ -296,6 +307,8 @@ class Reporter:
                 "size": analysis_a["file_size"],
                 "strengths": analysis_a.get("strengths", []),
                 "weaknesses": analysis_a.get("weaknesses", []),
+                "detailed_analysis": analysis_a.get("detailed_analysis", ""),
+                "content": content_a,
             },
             version_b={
                 "name": result.version_b["name"],
@@ -304,6 +317,8 @@ class Reporter:
                 "size": analysis_b["file_size"],
                 "strengths": analysis_b.get("strengths", []),
                 "weaknesses": analysis_b.get("weaknesses", []),
+                "detailed_analysis": analysis_b.get("detailed_analysis", ""),
+                "content": content_b,
             },
             winner=result.winner,
             score_delta=result.score_delta,
