@@ -46,11 +46,11 @@ Options:
 
 ## Testing Checklist
 
-- [ ] Command executes successfully with valid file
-- [ ] Error handling for missing file
-- [ ] Error handling for Ollama connection failure
-- [ ] Text report generation works
-- [ ] HTML report generation works
-- [ ] Both format option works
-- [ ] Quiet mode suppresses console output
-- [ ] Coverage >= 80% on new code
+- [x] Command executes successfully with valid file
+- [x] Error handling for missing file
+- [x] Error handling for Ollama connection failure
+- [x] Text report generation works
+- [x] HTML report generation works
+- [x] Both format option works
+- [x] Quiet mode suppresses console output
+- [x] Coverage >= 80% on new code
