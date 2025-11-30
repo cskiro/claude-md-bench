@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from claude_md_bench.core.analyzer import AnalysisResult
 from claude_md_bench.llm.ollama import OllamaClient
 
 
@@ -141,3 +142,23 @@ def mock_comparison_result() -> dict[str, Any]:
         "winner": "A",
         "score_delta": 13.0,
     }
+
+
+@pytest.fixture
+def mock_analysis_result() -> AnalysisResult:
+    """Create a mock AnalysisResult for testing audit functionality."""
+    return AnalysisResult(
+        score=75.0,
+        file_size=1000,
+        dimension_scores={
+            "clarity": 80.0,
+            "completeness": 70.0,
+            "actionability": 75.0,
+            "standards": 80.0,
+            "context": 70.0,
+        },
+        strengths=["Well organized", "Clear commands", "Good standards"],
+        weaknesses=["Missing examples", "No architecture diagram", "Limited context"],
+        recommendations=["Add code examples", "Include system diagram", "Expand troubleshooting"],
+        detailed_analysis="This CLAUDE.md file provides good coverage of basic requirements...",
+    )

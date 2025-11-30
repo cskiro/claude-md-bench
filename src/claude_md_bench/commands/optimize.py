@@ -7,7 +7,7 @@ Iteratively improves a CLAUDE.md file using meta-prompting.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich.console import Console
@@ -59,7 +59,7 @@ def optimize(
         ),
     ] = "http://localhost:11434",
     output: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             "--output",
             "-o",
@@ -126,12 +126,14 @@ def optimize(
     # Run optimization
     try:
         if not quiet:
-            console.print(Panel.fit(
-                f"[bold cyan]Optimizing CLAUDE.md[/bold cyan]\n"
-                f"File: {file}\n"
-                f"Iterations: {iterations}",
-                border_style="cyan",
-            ))
+            console.print(
+                Panel.fit(
+                    f"[bold cyan]Optimizing CLAUDE.md[/bold cyan]\n"
+                    f"File: {file}\n"
+                    f"Iterations: {iterations}",
+                    border_style="cyan",
+                )
+            )
             console.print()
 
         with Progress(
@@ -155,10 +157,10 @@ def optimize(
 
     except OllamaConnectionError as e:
         console.print(f"[red]Connection error:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
     except Exception as e:
         console.print(f"[red]Optimization failed:[/red] {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
 
     # Display results
     if not quiet:
@@ -170,16 +172,24 @@ def _print_optimization_result(result: OptimizationResult) -> None:
     console.print()
 
     # Summary panel
-    improvement_color = "green" if result.total_improvement > 0 else "yellow" if result.total_improvement == 0 else "red"
+    improvement_color = (
+        "green"
+        if result.total_improvement > 0
+        else "yellow"
+        if result.total_improvement == 0
+        else "red"
+    )
     improvement_sign = "+" if result.total_improvement > 0 else ""
 
-    console.print(Panel.fit(
-        f"[bold]Optimization Complete[/bold]\n\n"
-        f"Original Score: {result.original_score:.1f}/100\n"
-        f"Final Score: [bold]{result.final_score:.1f}/100[/bold]\n"
-        f"Improvement: [{improvement_color}]{improvement_sign}{result.total_improvement:.1f} points[/{improvement_color}]",
-        border_style="green" if result.total_improvement > 0 else "yellow",
-    ))
+    console.print(
+        Panel.fit(
+            f"[bold]Optimization Complete[/bold]\n\n"
+            f"Original Score: {result.original_score:.1f}/100\n"
+            f"Final Score: [bold]{result.final_score:.1f}/100[/bold]\n"
+            f"Improvement: [{improvement_color}]{improvement_sign}{result.total_improvement:.1f} points[/{improvement_color}]",
+            border_style="green" if result.total_improvement > 0 else "yellow",
+        )
+    )
 
     # Iteration details table
     console.print("\n[bold]Iteration Progress[/bold]")
@@ -209,7 +219,7 @@ def _print_optimization_result(result: OptimizationResult) -> None:
 
     # Output location
     if result.output_path:
-        console.print(f"\n[bold]Output saved to:[/bold]")
+        console.print("\n[bold]Output saved to:[/bold]")
         console.print(f"  [cyan]{result.output_path}[/cyan]")
 
     # Size comparison
@@ -218,4 +228,6 @@ def _print_optimization_result(result: OptimizationResult) -> None:
     size_delta = final_size - original_size
     size_pct = (size_delta / original_size * 100) if original_size > 0 else 0
 
-    console.print(f"\n[dim]Size: {original_size:,} -> {final_size:,} chars ({size_pct:+.1f}%)[/dim]")
+    console.print(
+        f"\n[dim]Size: {original_size:,} -> {final_size:,} chars ({size_pct:+.1f}%)[/dim]"
+    )

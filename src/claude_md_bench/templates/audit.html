@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLAUDE.md Audit - {{ file_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.6;
+            color: #e8e6e3;
+            background: #DA7756;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #1a1816;
+            border-radius: 12px;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3),
+                        0 8px 40px rgba(0, 0, 0, 0.4),
+                        0 0 80px rgba(205, 127, 107, 0.15);
+            overflow: hidden;
+            border: 1px solid #3d3632;
+        }
+
+        .content {
+            padding: 32px 40px;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #e8e6e3;
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #6eb5a8;
+            margin: 28px 0 16px 0;
+        }
+
+        .file-info {
+            font-size: 0.85em;
+            color: #8a8580;
+            margin-bottom: 24px;
+        }
+
+        .file-info strong {
+            color: #b0ada8;
+        }
+
+        .score-section {
+            text-align: center;
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .overall-score {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .score-high { color: #6eb5a8; }
+        .score-medium { color: #f0d080; }
+        .score-low { color: #f0a0a0; }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #8a8580;
+        }
+
+        .score-bar-container {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .dimension-row {
+            margin-bottom: 16px;
+        }
+
+        .dimension-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .dimension-name {
+            font-size: 0.9em;
+            color: #b0ada8;
+            text-transform: capitalize;
+        }
+
+        .dimension-value {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #e8e6e3;
+        }
+
+        .bar-container {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar {
+            height: 100%;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 8px;
+            font-size: 0.7em;
+            font-weight: 600;
+        }
+
+        .bar-high { background: linear-gradient(90deg, rgba(110, 181, 168, 0.3), rgba(110, 181, 168, 0.6)); }
+        .bar-medium { background: linear-gradient(90deg, rgba(240, 208, 128, 0.3), rgba(240, 208, 128, 0.6)); }
+        .bar-low { background: linear-gradient(90deg, rgba(240, 160, 160, 0.3), rgba(240, 160, 160, 0.6)); }
+
+        .feedback-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .feedback-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feedback-block {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .feedback-title {
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .strengths-title { color: #6eb5a8; }
+        .weaknesses-title { color: #f0a0a0; }
+        .recommendations-title { color: #a0d0f0; }
+
+        .feedback-list {
+            list-style: none;
+        }
+
+        .feedback-list li {
+            font-size: 0.85em;
+            color: #b0ada8;
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .feedback-list li::before {
+            position: absolute;
+            left: 0;
+        }
+
+        .strengths-list li::before {
+            content: "+";
+            color: #6eb5a8;
+        }
+
+        .weaknesses-list li::before {
+            content: "-";
+            color: #f0a0a0;
+        }
+
+        .recommendations-list li::before {
+            content: "*";
+            color: #a0d0f0;
+        }
+
+        .recommendations-block {
+            grid-column: 1 / -1;
+        }
+
+        .detailed-analysis {
+            margin-top: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .detailed-analysis summary {
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #cd7f6b;
+            list-style: none;
+        }
+
+        .detailed-analysis summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .detailed-analysis summary::before {
+            content: "+ ";
+        }
+
+        .detailed-analysis[open] summary::before {
+            content: "- ";
+        }
+
+        .detailed-analysis summary:hover {
+            color: #e8a090;
+        }
+
+        .analysis-content {
+            padding: 16px;
+            font-size: 0.85em;
+            color: #b0ada8;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.75em;
+            color: #6a6560;
+            text-align: center;
+        }
+
+        /* File content drawer */
+        .file-drawer {
+            margin-top: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .file-drawer summary {
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #cd7f6b;
+            list-style: none;
+        }
+
+        .file-drawer summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .file-drawer summary::before {
+            content: "+ ";
+        }
+
+        .file-drawer[open] summary::before {
+            content: "- ";
+        }
+
+        .file-drawer summary:hover {
+            color: #e8a090;
+        }
+
+        .file-content {
+            padding: 16px;
+            font-size: 0.8em;
+            color: #b0ada8;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1>CLAUDE.md Audit Report</h1>
+            <div class="file-info">
+                <strong>File:</strong> {{ file_path }}<br>
+                <strong>Size:</strong> {{ "{:,}".format(file_size) }} characters<br>
+                <strong>Generated:</strong> {{ timestamp }}
+            </div>
+
+            <div class="score-section">
+                <div class="overall-score {% if score >= 70 %}score-high{% elif score >= 50 %}score-medium{% else %}score-low{% endif %}">
+                    {{ "%.1f"|format(score) }}
+                </div>
+                <div class="score-label">Overall Score / 100</div>
+                <div class="score-bar-container">
+                    <div class="score-bar-fill {% if score >= 70 %}bar-high{% elif score >= 50 %}bar-medium{% else %}bar-low{% endif %}" style="width: {{ score }}%"></div>
+                </div>
+            </div>
+
+            <h2>Dimension Scores</h2>
+            {% for dim in dimensions %}
+            {% set dim_score = dimension_scores.get(dim, 0) %}
+            <div class="dimension-row">
+                <div class="dimension-header">
+                    <span class="dimension-name">{{ dim }}</span>
+                    <span class="dimension-value">{{ "%.0f"|format(dim_score) }}/100</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar {% if dim_score >= 70 %}bar-high{% elif dim_score >= 50 %}bar-medium{% else %}bar-low{% endif %}" style="width: {{ dim_score }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <h2>Analysis</h2>
+            <div class="feedback-section">
+                <div class="feedback-block">
+                    <div class="feedback-title strengths-title">Strengths</div>
+                    <ul class="feedback-list strengths-list">
+                        {% for item in strengths %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="feedback-block">
+                    <div class="feedback-title weaknesses-title">Weaknesses</div>
+                    <ul class="feedback-list weaknesses-list">
+                        {% for item in weaknesses %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="feedback-block recommendations-block">
+                    <div class="feedback-title recommendations-title">Recommendations</div>
+                    <ul class="feedback-list recommendations-list">
+                        {% for item in recommendations %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            {% if detailed_analysis %}
+            <details class="detailed-analysis">
+                <summary>Detailed Analysis</summary>
+                <div class="analysis-content">{{ detailed_analysis }}</div>
+            </details>
+            {% endif %}
+
+            {% if file_content %}
+            <details class="file-drawer">
+                <summary>View CLAUDE.md Content</summary>
+                <div class="file-content">{{ file_content }}</div>
+            </details>
+            {% endif %}
+
+            <div class="footer">
+                Generated by claude-md-bench
+            </div>
+        </div>
+    </div>
+</body>
+</html>

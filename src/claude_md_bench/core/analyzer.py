@@ -136,7 +136,7 @@ class ClaudeMDAnalyzer:
         Returns:
             Comparison result with winner and detailed analysis
         """
-        logger.info(f"\nComparing:")
+        logger.info("\nComparing:")
         logger.info(f"  A: {claude_md_a}")
         logger.info(f"  B: {claude_md_b}")
 
@@ -208,7 +208,9 @@ Evaluate files on these dimensions and provide constructive feedback."""
         max_content_chars = 4000
         truncated_content = content[:max_content_chars]
         if len(content) > max_content_chars:
-            truncated_content += f"\n\n[... truncated, {char_count - max_content_chars} more chars ...]"
+            truncated_content += (
+                f"\n\n[... truncated, {char_count - max_content_chars} more chars ...]"
+            )
 
         return f"""# CLAUDE.md File Analysis
 
@@ -275,7 +277,14 @@ DETAILED_ANALYSIS:
 
         # Extract scores - handle multiple formats
         for line in response.split("\n"):
-            for metric in ["CLARITY", "COMPLETENESS", "ACTIONABILITY", "STANDARDS", "CONTEXT", "OVERALL"]:
+            for metric in [
+                "CLARITY",
+                "COMPLETENESS",
+                "ACTIONABILITY",
+                "STANDARDS",
+                "CONTEXT",
+                "OVERALL",
+            ]:
                 line_upper = line.upper()
                 if metric in line_upper:
                     try:

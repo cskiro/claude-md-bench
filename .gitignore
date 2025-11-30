@@ -138,5 +138,8 @@ reports/
 # Lessons learned (auto-generated, user-specific)
 docs/lessons-learned/
 
+# Benchmarks (local test fixtures with calibration data)
+benchmarks/
+
 # Project CLAUDE.md (user-specific configuration)
 CLAUDE.md

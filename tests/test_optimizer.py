@@ -7,13 +7,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from claude_md_bench.core.analyzer import AnalysisResult
 from claude_md_bench.core.optimizer import (
     ClaudeMDOptimizer,
     MetaPrompter,
     OptimizationIteration,
     OptimizationResult,
 )
-from claude_md_bench.core.analyzer import AnalysisResult
 
 
 class TestOptimizationDataclasses:
@@ -319,9 +319,9 @@ def test_example():
         # Interleave analysis and improvement responses
         responses = [
             mock_analysis_responses[0],  # Baseline analysis
-            mock_improved_contents[0],   # First improvement
+            mock_improved_contents[0],  # First improvement
             mock_analysis_responses[1],  # Analysis of improvement 1
-            mock_improved_contents[1],   # Second improvement
+            mock_improved_contents[1],  # Second improvement
             mock_analysis_responses[2],  # Analysis of improvement 2
         ]
         mock_ollama_client.generate.side_effect = responses
@@ -461,7 +461,7 @@ class TestOptimizeCommand:
         """Should have optimize command registered."""
         from claude_md_bench.cli import app
 
-        commands = [cmd for cmd in app.registered_commands]
+        commands = list(app.registered_commands)
         command_names = [cmd.name or cmd.callback.__name__ for cmd in commands]
 
         assert "optimize" in command_names
@@ -469,6 +469,7 @@ class TestOptimizeCommand:
     def test_optimize_command_requires_file(self) -> None:
         """Should require file argument."""
         from typer.testing import CliRunner
+
         from claude_md_bench.cli import app
 
         runner = CliRunner()
@@ -485,6 +486,7 @@ class TestOptimizeCommand:
     ) -> None:
         """Should complete optimization workflow and save output file."""
         from typer.testing import CliRunner
+
         from claude_md_bench.cli import app
 
         # Setup mock responses for: baseline analysis, improvement, improved analysis
@@ -525,6 +527,7 @@ class TestOptimizeCommand:
     ) -> None:
         """Should show error when Ollama is not running."""
         from typer.testing import CliRunner
+
         from claude_md_bench.cli import app
 
         mock_client = MagicMock()

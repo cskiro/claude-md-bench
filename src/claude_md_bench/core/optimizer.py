@@ -10,7 +10,6 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 from claude_md_bench.core.analyzer import AnalysisResult, ClaudeMDAnalyzer
 from claude_md_bench.llm.ollama import OllamaClient
@@ -346,7 +345,9 @@ class ClaudeMDOptimizer:
             # Calculate delta
             delta = improved_score - current_score
 
-            logger.info(f"Iteration {i}: {current_score:.1f} -> {improved_score:.1f} ({delta:+.1f})")
+            logger.info(
+                f"Iteration {i}: {current_score:.1f} -> {improved_score:.1f} ({delta:+.1f})"
+            )
 
             # Record iteration
             iteration_result = OptimizationIteration(
@@ -381,7 +382,7 @@ class ClaudeMDOptimizer:
         output_path.write_text(result.final_content, encoding="utf-8")
         result.output_path = output_path
 
-        logger.info(f"\nOptimization complete!")
+        logger.info("\nOptimization complete!")
         logger.info(f"Original: {result.original_score:.1f}/100")
         logger.info(f"Final: {result.final_score:.1f}/100")
         logger.info(f"Improvement: {result.total_improvement:+.1f} points")
