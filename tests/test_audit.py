@@ -11,6 +11,13 @@ from typer.testing import CliRunner
 from claude_md_bench.cli import app
 from claude_md_bench.core.analyzer import AnalysisResult
 from claude_md_bench.core.reporter import Reporter
+from claude_md_bench.core.reporting_constants import (
+    DIMENSIONS,
+    generate_comparison_filename,
+    generate_report_filename,
+    get_delta_style,
+    get_score_style,
+)
 
 runner = CliRunner()
 
@@ -395,3 +402,76 @@ class TestReporterAuditMethods:
 
         assert new_dir.exists()
         assert reporter.output_dir == new_dir
+
+
+class TestReportingConstants:
+    """Tests for reporting constants and utility functions."""
+
+    def test_dimensions_contains_expected_values(self) -> None:
+        """Should contain all five evaluation dimensions."""
+        assert len(DIMENSIONS) == 5
+        assert "clarity" in DIMENSIONS
+        assert "completeness" in DIMENSIONS
+        assert "actionability" in DIMENSIONS
+        assert "standards" in DIMENSIONS
+        assert "context" in DIMENSIONS
+
+    @pytest.mark.parametrize(
+        "score,expected",
+        [
+            (100, "green"),
+            (70, "green"),
+            (69.9, "yellow"),
+            (50, "yellow"),
+            (49.9, "red"),
+            (0, "red"),
+        ],
+    )
+    def test_get_score_style_returns_correct_color(self, score: float, expected: str) -> None:
+        """Should return correct Rich color based on score thresholds."""
+        assert get_score_style(score) == expected
+
+    @pytest.mark.parametrize(
+        "delta,expected",
+        [
+            (10.0, "green"),
+            (0.1, "green"),
+            (0.0, "white"),
+            (-0.1, "red"),
+            (-10.0, "red"),
+        ],
+    )
+    def test_get_delta_style_returns_correct_color(self, delta: float, expected: str) -> None:
+        """Should return correct Rich color based on delta sign."""
+        assert get_delta_style(delta) == expected
+
+    def test_generate_report_filename_creates_valid_name(self) -> None:
+        """Should generate filename with prefix, name, and extension."""
+        filename = generate_report_filename("audit", "test-file", "txt")
+
+        assert filename.startswith("audit_test-file_")
+        assert filename.endswith(".txt")
+        # Should contain timestamp pattern YYYYMMDD_HHMMSS
+        assert len(filename) == len("audit_test-file_YYYYMMDD_HHMMSS.txt")
+
+    def test_generate_report_filename_sanitizes_slashes(self) -> None:
+        """Should replace slashes in name with underscores."""
+        filename = generate_report_filename("audit", "path/to/file", "txt")
+
+        assert "/" not in filename
+        assert "path_to_file" in filename
+
+    def test_generate_comparison_filename_creates_valid_name(self) -> None:
+        """Should generate comparison filename with both names."""
+        filename = generate_comparison_filename("comparison", "file-a", "file-b", "html")
+
+        assert filename.startswith("comparison_file-a_vs_file-b_")
+        assert filename.endswith(".html")
+
+    def test_generate_comparison_filename_sanitizes_slashes(self) -> None:
+        """Should replace slashes in both names."""
+        filename = generate_comparison_filename("comparison", "dir/file-a", "other/file-b", "txt")
+
+        assert "/" not in filename
+        assert "dir_file-a" in filename
+        assert "other_file-b" in filename

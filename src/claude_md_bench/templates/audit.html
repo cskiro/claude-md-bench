@@ -330,7 +330,7 @@
             </div>
 
             <h2>Dimension Scores</h2>
-            {% for dim in ['clarity', 'completeness', 'actionability', 'standards', 'context'] %}
+            {% for dim in dimensions %}
             {% set dim_score = dimension_scores.get(dim, 0) %}
             <div class="dimension-row">
                 <div class="dimension-header">

@@ -1,7 +1,7 @@
 """
 Report Generator
 
-Generates text and HTML reports for CLAUDE.md comparisons.
+Generates text and HTML reports for CLAUDE.md comparisons and audits.
 """
 
 from __future__ import annotations
@@ -17,6 +17,13 @@ from rich.panel import Panel
 from rich.table import Table
 
 from claude_md_bench.core.analyzer import AnalysisResult, ComparisonResult
+from claude_md_bench.core.reporting_constants import (
+    DIMENSIONS,
+    generate_comparison_filename,
+    generate_report_filename,
+    get_delta_style,
+    get_score_style,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -135,13 +142,13 @@ class Reporter:
         scores_a = analysis_a.get("dimension_scores", {})
         scores_b = analysis_b.get("dimension_scores", {})
 
-        for dim in ["clarity", "completeness", "actionability", "standards", "context"]:
+        for dim in DIMENSIONS:
             score_a = scores_a.get(dim, 0.0)
             score_b = scores_b.get(dim, 0.0)
             delta = score_a - score_b
 
             delta_str = f"+{delta:.0f}" if delta > 0 else f"{delta:.0f}"
-            delta_color = "green" if delta > 0 else "red" if delta < 0 else "white"
+            delta_color = get_delta_style(delta)
 
             table.add_row(
                 dim.title(),
@@ -189,10 +196,12 @@ class Reporter:
         Returns:
             Path to saved report
         """
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        name_a = result.version_a["name"].replace("/", "_")
-        name_b = result.version_b["name"].replace("/", "_")
-        filename = f"comparison_{name_a}_vs_{name_b}_{timestamp}.txt"
+        filename = generate_comparison_filename(
+            "comparison",
+            result.version_a["name"],
+            result.version_b["name"],
+            "txt",
+        )
         report_path = self.output_dir / filename
 
         analysis_a = result.version_a["analysis"]
@@ -224,7 +233,7 @@ class Reporter:
             scores_a = analysis_a.get("dimension_scores", {})
             scores_b = analysis_b.get("dimension_scores", {})
 
-            for dim in ["clarity", "completeness", "actionability", "standards", "context"]:
+            for dim in DIMENSIONS:
                 f.write(
                     f"{dim.title():<15} A: {scores_a.get(dim, 0):.0f}  B: {scores_b.get(dim, 0):.0f}\n"
                 )
@@ -278,22 +287,24 @@ class Reporter:
             logger.error(f"Failed to load template: {e}")
             return None
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        name_a = result.version_a["name"].replace("/", "_")
-        name_b = result.version_b["name"].replace("/", "_")
-        filename = f"comparison_{name_a}_vs_{name_b}_{timestamp}.html"
+        filename = generate_comparison_filename(
+            "comparison",
+            result.version_a["name"],
+            result.version_b["name"],
+            "html",
+        )
         report_path = self.output_dir / filename
 
         analysis_a = result.version_a["analysis"]
         analysis_b = result.version_b["analysis"]
 
         # Build dimension comparison data
-        dimensions: dict[str, dict[str, float]] = {}
+        dimensions_data: dict[str, dict[str, float]] = {}
         scores_a = analysis_a.get("dimension_scores", {})
         scores_b = analysis_b.get("dimension_scores", {})
 
-        for dim in ["clarity", "completeness", "actionability", "standards", "context"]:
-            dimensions[dim] = {
+        for dim in DIMENSIONS:
+            dimensions_data[dim] = {
                 "a": scores_a.get(dim, 0.0),
                 "b": scores_b.get(dim, 0.0),
             }
@@ -333,7 +344,7 @@ class Reporter:
             },
             winner=result.winner,
             score_delta=result.score_delta,
-            dimensions=dimensions,
+            dimensions=dimensions_data,
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         )
 
@@ -349,6 +360,8 @@ class Reporter:
             result: Analysis result to display
             file_path: Path to the audited file
         """
+        logger.info(f"Printing audit results for: {file_path}")
+
         # Header
         self.console.print()
         self.console.print(
@@ -359,7 +372,7 @@ class Reporter:
         )
 
         # Overall score with color coding
-        score_color = "green" if result.score >= 70 else "yellow" if result.score >= 50 else "red"
+        score_color = get_score_style(result.score)
         self.console.print(
             f"\n[bold]Overall Score:[/bold] [{score_color}]{result.score:.1f}/100[/{score_color}]"
         )
@@ -371,9 +384,9 @@ class Reporter:
         table.add_column("Dimension", style="cyan")
         table.add_column("Score", justify="right")
 
-        for dim in ["clarity", "completeness", "actionability", "standards", "context"]:
+        for dim in DIMENSIONS:
             score = result.dimension_scores.get(dim, 0.0)
-            score_style = "green" if score >= 70 else "yellow" if score >= 50 else "red"
+            score_style = get_score_style(score)
             table.add_row(dim.title(), f"[{score_style}]{score:.0f}[/{score_style}]")
 
         self.console.print(table)
@@ -407,8 +420,7 @@ class Reporter:
         Returns:
             Path to saved report
         """
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"audit_{file_path.stem}_{timestamp}.txt"
+        filename = generate_report_filename("audit", file_path.stem, "txt")
         report_path = self.output_dir / filename
 
         with open(report_path, "w", encoding="utf-8") as f:
@@ -425,7 +437,7 @@ class Reporter:
             f.write("Dimension Scores\n")
             f.write("-" * 70 + "\n\n")
 
-            for dim in ["clarity", "completeness", "actionability", "standards", "context"]:
+            for dim in DIMENSIONS:
                 score = result.dimension_scores.get(dim, 0.0)
                 f.write(f"{dim.title():<15} {score:.0f}/100\n")
 
@@ -487,8 +499,7 @@ class Reporter:
             logger.error(f"Failed to load audit template: {e}")
             return None
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"audit_{file_path.stem}_{timestamp}.html"
+        filename = generate_report_filename("audit", file_path.stem, "html")
         report_path = self.output_dir / filename
 
         # Read file content for display
@@ -504,6 +515,7 @@ class Reporter:
             file_content=file_content,
             score=result.score,
             file_size=result.file_size,
+            dimensions=DIMENSIONS,
             dimension_scores=result.dimension_scores,
             strengths=result.strengths,
             weaknesses=result.weaknesses,
